@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .upload-container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .upload-area {
+            border: 2px dashed #007bff;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer; /* Indicate clickable area */
+        }
+        #fileInput {
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h2>Upload File</h2>
+        <div class="upload-area" id="uploadArea">
+            Drag and drop your file here or click to select
+        </div>
+        <input type="file" id="fileInput" />
+        <button id="uploadBtn">Upload</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const message = document.getElementById('message');
+
+        // Handle drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('active');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('active');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            const file = e.dataTransfer.files[0];
+            fileInput.files = e.dataTransfer.files; // Set the file input's files
+            uploadFile(file);
+        });
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click(); // Open file dialog
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            uploadFile(file);
+        });
+
+        uploadBtn.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            uploadFile(file);
+        });
+
+        // Upload file function
+        function uploadFile(file) {
+            console.log('uploadFile called with file:', file);
+            if (!file) {
+                console.error('No file selected.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('http://localhost:3000/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data); // Log the response data
+                if (data.file) {
+                    // Show the download link for the uploaded file
+                    message.innerHTML = `
+                        File uploaded successfully: 
+                        <a href="${data.file.path}" target="_blank" download>
+                            Download ${data.file.originalname}
+                        </a>
+                    `;
+                } else {
+                    message.innerHTML = 'File upload failed!';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error); // Log any errors
+                message.innerHTML = 'Error: ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html>

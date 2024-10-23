@@ -1,0 +1,12 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 50px;
+}
+body .upload-form {
+  margin: 20px auto;
+  width: 300px;
+  padding: 30px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}/*# sourceMappingURL=style.css.map */
